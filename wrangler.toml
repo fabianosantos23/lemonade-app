@@ -1,0 +1,19 @@
+# =============================================================================
+# Cloudflare Pages — app.lemonade.red (platform)
+# =============================================================================
+# Este wrangler.toml é lido quando o CF Pages usa apps/platform-angular
+# como root directory do projeto.
+#
+# Configuração no dashboard CF Pages (projeto: app.lemonade.red):
+#   Root directory : apps/platform-angular
+#   Build command  : pnpm run build
+#   Output dir     : dist/web-angular/browser   (relativo ao root directory)
+#
+# IMPORTANTE: usar "pnpm run build" e NÃO "ng build" diretamente.
+# O pnpm executa o script "build" do package.json local e resolve o ng CLI
+# a partir de node_modules/.bin, sem precisar de instalação global.
+# =============================================================================
+
+name = "automatiza-produtos-platform"
+compatibility_date = "2026-01-23"
+pages_build_output_dir = "dist/web-angular/browser"

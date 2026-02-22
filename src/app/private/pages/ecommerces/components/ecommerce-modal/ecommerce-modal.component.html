@@ -1,0 +1,162 @@
+<div
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm modal-fade"
+  (click)="closeModal()"
+>
+  <div
+    class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl modal-slide"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header -->
+    <div class="relative bg-gradient-to-r from-blue-600 to-violet-600 px-8 py-6">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-white">
+            {{ isEditing() ? "Editar Marketplace" : "Novo Marketplace" }}
+          </h2>
+          <p class="mt-1 text-sm text-blue-100">
+            {{ isEditing() ? "Atualize as informações da integração" : "Conecte um novo canal de vendas" }}
+          </p>
+        </div>
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="rounded-lg p-1.5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+          aria-label="Fechar modal"
+        >
+          <lucide-icon [img]="XIcon" class="h-5 w-5"></lucide-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="max-h-[calc(90vh-12rem)] overflow-y-auto">
+      @if (errorMessage()) {
+        <div class="mx-8 mt-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">
+          <lucide-icon [img]="AlertCircleIcon" class="h-5 w-5 flex-shrink-0 text-red-500"></lucide-icon>
+          <p class="text-sm font-medium">{{ errorMessage() }}</p>
+        </div>
+      }
+
+      <form
+        [formGroup]="form"
+        (ngSubmit)="onSubmit()"
+        class="space-y-6 p-8"
+        novalidate
+      >
+        <!-- Nome -->
+        <div>
+          <label
+            for="ecommerce-name"
+            class="mb-2 block text-sm font-semibold text-slate-700"
+          >
+            Nome da Integração
+            <span class="text-red-500">*</span>
+          </label>
+          <input
+            id="ecommerce-name"
+            formControlName="name"
+            type="text"
+            placeholder="Ex: Minha Loja Oficial"
+            [class]="'w-full rounded-xl border px-4 py-3 text-sm transition-all placeholder:text-slate-400 focus:outline-none focus:ring-2 ' + (form.controls['name'].invalid && form.controls['name'].touched ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200' : 'border-slate-200 bg-white hover:border-slate-300 focus:border-blue-500 focus:ring-blue-200')"
+          />
+          @if (form.controls['name'].invalid && form.controls['name'].touched) {
+            <p class="mt-1.5 flex items-center gap-1 text-xs text-red-600">
+              <lucide-icon [img]="AlertCircleIcon" class="h-3.5 w-3.5 flex-shrink-0"></lucide-icon>
+              @if (form.controls['name'].errors?.['required']) {
+                O nome é obrigatório
+              } @else if (form.controls['name'].errors?.['minlength']) {
+                O nome deve ter pelo menos 3 caracteres
+              }
+            </p>
+          }
+        </div>
+
+        <!-- Prompt -->
+        <div>
+          <label
+            for="ecommerce-prompt"
+            class="mb-2 block text-sm font-semibold text-slate-700"
+          >
+            Prompt
+            <span class="text-red-500">*</span>
+          </label>
+          <textarea
+            id="ecommerce-prompt"
+            formControlName="prompt"
+            rows="3"
+            placeholder="Instruções para o agente..."
+            maxlength="10000"
+            [class]="'w-full resize-none rounded-xl border px-4 py-3 text-sm transition-all placeholder:text-slate-400 focus:outline-none focus:ring-2 ' + (form.controls['prompt'].invalid && form.controls['prompt'].touched ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200' : 'border-slate-200 bg-white hover:border-slate-300 focus:border-blue-500 focus:ring-blue-200')"
+          ></textarea>
+          <div class="flex justify-between mt-1.5">
+             <p class="flex items-center gap-1 text-xs text-red-600">
+              @if (form.controls['prompt'].invalid && form.controls['prompt'].touched) {
+                <lucide-icon [img]="AlertCircleIcon" class="h-3.5 w-3.5 flex-shrink-0"></lucide-icon>
+                <span>O prompt é obrigatório</span>
+              }
+            </p>
+            <p class="text-xs text-slate-500">
+              {{ form.controls['prompt'].value?.length || 0 }}/10000 caracteres
+            </p>
+          </div>
+        </div>
+
+                <!-- Upload de Imagem -->
+        <app-image-upload
+          label="Logo do Marketplace"
+          subLabel="(Opcional)"
+          [optional]="true"
+          [uploadProgress]="uploadProgress()"
+          [isSaving]="isSaving()"
+          [initialPreview]="imagePreview()"
+          (filesChange)="onFilesChange($event)"
+        ></app-image-upload>
+      </form>
+    </div>
+
+    <!-- Footer com Botões -->
+    <div class="border-t border-slate-200 bg-slate-50 px-8 py-4">
+      <div class="flex items-center justify-end gap-3">
+        <button
+          type="button"
+          (click)="closeModal()"
+          [disabled]="isSaving()"
+          class="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition-all hover:bg-white hover:shadow-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          (click)="onSubmit()"
+          [disabled]="isSaving()"
+          class="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          @if (isSaving()) {
+            <svg
+              class="h-4 w-4 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Salvando...
+          } @else {
+            {{ isEditing() ? "Salvar Alterações" : "Criar Marketplace" }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,368 @@
+<div class="mb-6 flex items-center justify-between">
+  <div>
+    <h2 class="text-xl font-bold text-slate-800">Descrições Geradas por IA</h2>
+    <p class="mt-1 text-sm text-slate-500">Aprove, reprove ou edite cada descrição individualmente</p>
+  </div>
+  <div class="flex gap-2">
+    <button
+      (click)="viewModeChange.emit('grid')"
+      [class.bg-blue-100]="viewMode() === 'grid'"
+      [class.text-blue-600]="viewMode() === 'grid'"
+      [class.text-slate-600]="viewMode() !== 'grid'"
+      class="rounded-lg p-2 transition-colors hover:bg-slate-100"
+      title="Visualização em grade"
+    >
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+      </svg>
+    </button>
+    <button
+      (click)="viewModeChange.emit('list')"
+      [class.bg-blue-100]="viewMode() === 'list'"
+      [class.text-blue-600]="viewMode() === 'list'"
+      [class.text-slate-600]="viewMode() !== 'list'"
+      class="rounded-lg p-2 transition-colors hover:bg-slate-100"
+      title="Visualização em lista"
+    >
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+  </div>
+</div>
+
+@if (approvalRate() !== null) {
+  <div class="mb-6 rounded-xl border border-green-200 bg-green-50/50 p-4">
+    <div class="mb-2 flex items-center justify-between">
+      <span class="text-sm font-medium text-green-800">Taxa de Aprovação</span>
+      <span class="text-lg font-bold text-green-600">{{ approvalRate() }}%</span>
+    </div>
+    <div class="h-2 overflow-hidden rounded-full bg-green-100">
+      <div class="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-500" [style.width.%]="approvalRate()"></div>
+    </div>
+  </div>
+}
+
+@if (descriptions() && descriptions()!.length > 0) {
+  @if (viewMode() === 'grid') {
+    <div class="grid gap-4 sm:grid-cols-2">
+      @for (desc of descriptions()!; track desc.id) {
+        <div
+          class="rounded-xl border transition-all duration-200"
+          [class.border-green-200]="desc.status === ImprovedDescriptionStatus.APPROVED"
+          [class.bg-green-50/50]="desc.status === ImprovedDescriptionStatus.APPROVED"
+          [class.border-red-200]="desc.status === ImprovedDescriptionStatus.REJECTED"
+          [class.bg-red-50/50]="desc.status === ImprovedDescriptionStatus.REJECTED"
+          [class.border-slate-200]="desc.status === ImprovedDescriptionStatus.GENERATED"
+          [class.bg-white]="desc.status === ImprovedDescriptionStatus.GENERATED"
+          [class.hover:shadow-md]="desc.status === ImprovedDescriptionStatus.GENERATED"
+        >
+          <div class="p-5">
+            <div class="mb-3 flex items-start justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">{{ desc.icon }}</span>
+                <div>
+                  <h4 class="font-semibold text-slate-800">{{ desc.name }}</h4>
+                  <p class="text-xs text-slate-500">
+                    {{ desc.generatedAt ? (desc.generatedAt | date: 'dd/MM/yyyy') : 'Data não disponível' }}
+                  </p>
+                </div>
+              </div>
+              @if (desc.status !== ImprovedDescriptionStatus.GENERATED) {
+                <span
+                  class="rounded-full px-2 py-1 text-xs font-semibold"
+                  [class.bg-green-100]="desc.status === ImprovedDescriptionStatus.APPROVED"
+                  [class.text-green-700]="desc.status === ImprovedDescriptionStatus.APPROVED"
+                  [class.bg-red-100]="desc.status === ImprovedDescriptionStatus.REJECTED"
+                  [class.text-red-700]="desc.status === ImprovedDescriptionStatus.REJECTED"
+                >
+                  {{ desc.status === ImprovedDescriptionStatus.APPROVED ? 'Aprovada' : 'Reprovada' }}
+                </span>
+              }
+            </div>
+
+            @if (editingDescriptionId() !== desc.id) {
+              <div>
+                <div class="relative mb-3 max-h-24 min-h-20 overflow-hidden">
+                  <p class="line-clamp-4 whitespace-pre-line text-sm text-slate-700">{{ desc.result }}</p>
+                  <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent"></div>
+                </div>
+                <button
+                  (click)="openDescription.emit(desc)"
+                  class="mb-3 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
+                >
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                  Ver completo
+                </button>
+                <div class="mb-3 flex items-center gap-2 text-xs text-slate-500">
+                  <span>{{ desc.result.length }} caracteres</span>
+                  <span>•</span>
+                  <span>{{ desc.result.trim().split(/\s+/).length }} palavras</span>
+                </div>
+              </div>
+            } @else {
+              <div class="mb-3">
+                <textarea
+                  [value]="editingDescriptionText()"
+                  (input)="editingTextChangeHandler($event)"
+                  rows="6"
+                  class="w-full rounded-lg border border-slate-300 p-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                ></textarea>
+              </div>
+            }
+
+            @if (editingDescriptionId() !== desc.id) {
+              <div class="flex gap-2">
+                <button
+                  (click)="approve.emit(desc.id)"
+                  [disabled]="desc.status !== ImprovedDescriptionStatus.GENERATED"
+                  class="flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all"
+                  [class.cursor-not-allowed]="desc.status !== ImprovedDescriptionStatus.GENERATED"
+                  [class.bg-green-100]="desc.status === ImprovedDescriptionStatus.APPROVED"
+                  [class.text-green-700]="desc.status === ImprovedDescriptionStatus.APPROVED"
+                  [class.bg-green-50]="desc.status !== ImprovedDescriptionStatus.APPROVED"
+                  [class.text-green-600]="desc.status !== ImprovedDescriptionStatus.APPROVED"
+                  [class.hover:bg-green-100]="desc.status === ImprovedDescriptionStatus.GENERATED"
+                >
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
+                  </svg>
+                  Aprovar
+                </button>
+                <button
+                  (click)="reject.emit(desc.id)"
+                  [disabled]="desc.status !== ImprovedDescriptionStatus.GENERATED"
+                  class="flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all"
+                  [class.cursor-not-allowed]="desc.status !== ImprovedDescriptionStatus.GENERATED"
+                  [class.bg-red-100]="desc.status === ImprovedDescriptionStatus.REJECTED"
+                  [class.text-red-700]="desc.status === ImprovedDescriptionStatus.REJECTED"
+                  [class.bg-red-50]="desc.status !== ImprovedDescriptionStatus.REJECTED"
+                  [class.text-red-600]="desc.status !== ImprovedDescriptionStatus.REJECTED"
+                  [class.hover:bg-red-100]="desc.status === ImprovedDescriptionStatus.GENERATED"
+                >
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path>
+                  </svg>
+                  Reprovar
+                </button>
+              </div>
+            } @else {
+              <div class="flex gap-2">
+                <button
+                  (click)="saveEdit.emit(desc.id)"
+                  [disabled]="savingDescriptionId() === desc.id"
+                  class="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  Salvar
+                </button>
+                <button
+                  (click)="cancelEdit.emit()"
+                  [disabled]="savingDescriptionId() === desc.id"
+                  class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  Cancelar
+                </button>
+              </div>
+            }
+
+            <div class="mt-2 flex gap-2">
+              @if (editingDescriptionId() !== desc.id) {
+                <button
+                  (click)="toggleEdit.emit({ id: desc.id, currentText: desc.result })"
+                  class="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                >
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                  Editar
+                </button>
+              }
+              <button
+                (click)="handleCopyClick(desc.result, desc.id)"
+                class="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                title="Copiar descrição"
+              >
+                @if (copiedDescriptionId() === desc.id) {
+                  <svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Copiado!
+                } @else {
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                  Copiar
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="space-y-4">
+      @for (desc of descriptions()!; track desc.id) {
+        <div
+          class="rounded-xl border transition-all duration-200"
+          [class.border-green-200]="desc.status === ImprovedDescriptionStatus.APPROVED"
+          [class.bg-green-50/50]="desc.status === ImprovedDescriptionStatus.APPROVED"
+          [class.border-red-200]="desc.status === ImprovedDescriptionStatus.REJECTED"
+          [class.bg-red-50/50]="desc.status === ImprovedDescriptionStatus.REJECTED"
+          [class.border-slate-200]="desc.status === ImprovedDescriptionStatus.GENERATED"
+          [class.bg-white]="desc.status === ImprovedDescriptionStatus.GENERATED"
+          [class.hover:shadow-md]="desc.status === ImprovedDescriptionStatus.GENERATED"
+        >
+          <div class="p-6">
+            <div class="mb-4 flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">{{ desc.icon }}</span>
+                <div>
+                  <h4 class="text-lg font-semibold text-slate-800">{{ desc.name }}</h4>
+                  <p class="text-sm text-slate-500">
+                    Gerada em {{ desc.generatedAt ? (desc.generatedAt | date: 'dd/MM/yyyy') : 'Data não disponível' }}
+                  </p>
+                </div>
+              </div>
+              @if (desc.status !== ImprovedDescriptionStatus.GENERATED) {
+                <span class="rounded-full px-3 py-1 text-sm font-semibold"
+                  [class.bg-green-100]="desc.status === ImprovedDescriptionStatus.APPROVED"
+                  [class.text-green-700]="desc.status === ImprovedDescriptionStatus.APPROVED"
+                  [class.bg-red-100]="desc.status === ImprovedDescriptionStatus.REJECTED"
+                  [class.text-red-700]="desc.status === ImprovedDescriptionStatus.REJECTED"
+                >
+                  {{ desc.status === ImprovedDescriptionStatus.APPROVED ? '✓ Aprovada' : '✗ Reprovada' }}
+                </span>
+              }
+            </div>
+
+            @if (editingDescriptionId() !== desc.id) {
+              <div>
+                <div class="relative mb-4 max-h-32 overflow-hidden">
+                  <p class="whitespace-pre-line text-sm leading-relaxed text-slate-700">{{ desc.result }}</p>
+                  <div class="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent"></div>
+                </div>
+                <button
+                  (click)="openDescription.emit(desc)"
+                  class="mb-4 flex items-center gap-2 rounded-xl border-2 border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-medium text-blue-700 transition-all hover:border-blue-300 hover:bg-blue-100"
+                >
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                  </svg>
+                  Expandir descrição completa
+                </button>
+                <div class="mb-4 flex items-center gap-3 text-xs text-slate-500">
+                  <span>{{ desc.result.length }} caracteres</span>
+                  <span>•</span>
+                  <span>{{ desc.result.trim().split(/\s+/).length }} palavras</span>
+                </div>
+              </div>
+            } @else {
+              <div class="mb-4">
+                <textarea
+                  [value]="editingDescriptionText()"
+                  (input)="editingTextChangeHandler($event)"
+                  rows="8"
+                  class="w-full rounded-lg border border-slate-300 p-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                ></textarea>
+              </div>
+            }
+
+            <div class="flex flex-wrap gap-2">
+              @if (editingDescriptionId() !== desc.id) {
+                <button
+                  (click)="approve.emit(desc.id)"
+                  [disabled]="desc.status !== ImprovedDescriptionStatus.GENERATED"
+                  class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all"
+                  [class.cursor-not-allowed]="desc.status !== ImprovedDescriptionStatus.GENERATED"
+                  [class.bg-green-100]="desc.status === ImprovedDescriptionStatus.APPROVED"
+                  [class.text-green-700]="desc.status === ImprovedDescriptionStatus.APPROVED"
+                  [class.bg-green-50]="desc.status !== ImprovedDescriptionStatus.APPROVED"
+                  [class.text-green-600]="desc.status !== ImprovedDescriptionStatus.APPROVED"
+                  [class.hover:bg-green-100]="desc.status === ImprovedDescriptionStatus.GENERATED"
+                >
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
+                  </svg>
+                  Aprovar Descrição
+                </button>
+                <button
+                  (click)="reject.emit(desc.id)"
+                  [disabled]="desc.status !== ImprovedDescriptionStatus.GENERATED"
+                  class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all"
+                  [class.cursor-not-allowed]="desc.status !== ImprovedDescriptionStatus.GENERATED"
+                  [class.bg-red-100]="desc.status === ImprovedDescriptionStatus.REJECTED"
+                  [class.text-red-700]="desc.status === ImprovedDescriptionStatus.REJECTED"
+                  [class.bg-red-50]="desc.status !== ImprovedDescriptionStatus.REJECTED"
+                  [class.text-red-600]="desc.status !== ImprovedDescriptionStatus.REJECTED"
+                  [class.hover:bg-red-100]="desc.status === ImprovedDescriptionStatus.GENERATED"
+                >
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path>
+                  </svg>
+                  Reprovar Descrição
+                </button>
+                <button
+                  (click)="toggleEdit.emit({ id: desc.id, currentText: desc.result })"
+                  class="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                >
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                  Editar
+                </button>
+                <button
+                  (click)="handleCopyClick(desc.result, desc.id)"
+                  class="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                >
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                  Copiar
+                </button>
+              } @else {
+                <button
+                  (click)="saveEdit.emit(desc.id)"
+                  [disabled]="savingDescriptionId() === desc.id"
+                  class="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Salvar Alterações
+                </button>
+                <button
+                  (click)="cancelEdit.emit()"
+                  [disabled]="savingDescriptionId() === desc.id"
+                  class="flex items-center gap-2 rounded-lg border border-slate-300 px-6 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  Cancelar
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+} @else {
+  <div class="rounded-2xl border border-slate-200 bg-white/80 p-6 backdrop-blur-sm">
+    <div class="py-12 text-center">
+      <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 to-violet-100">
+        <svg class="h-10 w-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+      </div>
+      <h3 class="mb-2 text-lg font-semibold text-slate-800">Nenhuma descrição gerada</h3>
+      <p class="mb-6 text-slate-500">Use a IA para gerar descrições otimizadas para diferentes marketplaces</p>
+      <button (click)="generateWithAI.emit()" class="rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-6 py-3 font-medium text-white transition-all hover:shadow-lg hover:shadow-blue-500/30">
+        Gerar com IA
+      </button>
+    </div>
+  </div>
+}

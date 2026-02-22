@@ -1,0 +1,220 @@
+<section class="space-y-6">
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+    <!-- Total -->
+    <div class="rounded-xl border border-slate-200 bg-white/80 p-4 backdrop-blur-sm transition-all hover:shadow-md">
+      <div class="flex items-center gap-3">
+        <div class="rounded-lg bg-blue-100 p-2">
+          <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-slate-600">Total</p>
+          <p class="text-2xl font-bold text-slate-800">{{ stats().total }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Básicos -->
+    <div class="rounded-xl border border-slate-200 bg-white/80 p-4 backdrop-blur-sm transition-all hover:shadow-md">
+      <div class="flex items-center gap-3">
+        <div class="rounded-lg bg-amber-100 p-2">
+          <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-slate-600">Básicos</p>
+          <p class="text-2xl font-bold text-slate-800">{{ stats().basic }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Melhorados -->
+    <div class="rounded-xl border border-slate-200 bg-white/80 p-4 backdrop-blur-sm transition-all hover:shadow-md">
+      <div class="flex items-center gap-3">
+        <div class="rounded-lg bg-blue-100 p-2">
+          <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-slate-600">Melhorados</p>
+          <p class="text-2xl font-bold text-slate-800">{{ stats().enhanced }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Publicados -->
+    <div class="rounded-xl border border-slate-200 bg-white/80 p-4 backdrop-blur-sm transition-all hover:shadow-md">
+      <div class="flex items-center gap-3">
+        <div class="rounded-lg bg-green-100 p-2">
+          <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-slate-600">Publicados</p>
+          <p class="text-2xl font-bold text-slate-800">{{ stats().published }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 backdrop-blur-sm">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <!-- Search -->
+      <div class="relative flex-1 md:max-w-md">
+        <input
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          type="search"
+          placeholder="Buscar produtos por nome..."
+          class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-10 pr-4 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <svg class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex flex-wrap items-center gap-2">
+        @for (filter of statusFilters; track filter.value) {
+          <button
+            (click)="setStatusFilter(filter.value)"
+            class="rounded-lg px-3 py-2 text-sm font-medium transition-all"
+            [class]="statusFilter() === filter.value 
+              ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-md' 
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+          >
+            {{ filter.label }}
+          </button>
+        }
+
+        <div class="h-6 w-px bg-slate-300"></div>
+
+        <!-- Sort -->
+        <select
+          [ngModel]="sortBy()"
+          (ngModelChange)="sortBy.set($event)"
+          class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition-all hover:bg-slate-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+        >
+          <option value="newest">Mais recentes</option>
+          <option value="oldest">Mais antigos</option>
+          <option value="name">Nome (A-Z)</option>
+        </select>
+
+        <button
+          (click)="openNewProductModal()"
+          class="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-4 py-2 font-medium text-white transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/30"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Novo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  @if (loading()) {
+    <div class="flex h-64 items-center justify-center">
+      <div class="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+    </div>
+  } @else {
+    @if (filteredProducts().length === 0 && products().length === 0) {
+      <!-- Empty State -->
+      <div class="rounded-2xl border border-slate-200 bg-white/80 p-6 backdrop-blur-sm">
+        <div class="py-12 text-center">
+          <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-100">
+            <svg class="h-10 w-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          </div>
+          <h3 class="mb-2 text-lg font-semibold text-slate-800">Nenhum produto cadastrado</h3>
+          <p class="mb-6 text-slate-500">Comece cadastrando seu primeiro produto para gerar conteúdo automaticamente</p>
+          <button
+            (click)="openNewProductModal()"
+            class="rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-6 py-3 font-medium text-white transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/30"
+          >
+            Cadastrar Primeiro Produto
+          </button>
+        </div>
+      </div>
+    } @else if (filteredProducts().length === 0) {
+      <!-- No Results -->
+      <div class="rounded-2xl border border-slate-200 bg-white/80 p-6 backdrop-blur-sm">
+        <div class="py-12 text-center">
+          <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-100">
+            <svg class="h-10 w-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <h3 class="mb-2 text-lg font-semibold text-slate-800">Nenhum produto encontrado</h3>
+          <p class="mb-4 text-slate-500">Tente ajustar os filtros ou buscar por outro termo</p>
+          <button
+            (click)="clearFilters()"
+            class="rounded-xl border border-slate-200 px-4 py-2 font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            Limpar Filtros
+          </button>
+        </div>
+      </div>
+    } @else {
+      <!-- Grid -->
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        @for (product of filteredProducts(); track product.id) {
+          <app-product-card
+            [product]="product"
+            (enhance)="handleEnhance($event)"
+            (viewDetails)="handleViewDetails($event)"
+            (edit)="handleEdit($event)"
+            (delete)="handleDelete($event)"
+          />
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (pagination().total > pagination().limit) {
+        <div class="mt-8 flex items-center justify-center gap-2">
+          <button
+            (click)="handlePageChange(pagination().page - 1)"
+            [disabled]="pagination().page === 1"
+            class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-all hover:bg-slate-50 disabled:opacity-50"
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          <span class="text-sm font-medium text-slate-600">
+            Página {{ pagination().page }} de {{ pagination().totalPages }}
+          </span>
+
+          <button
+            (click)="handlePageChange(pagination().page + 1)"
+            [disabled]="pagination().page === pagination().totalPages"
+            class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-all hover:bg-slate-50 disabled:opacity-50"
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      }
+    }
+  }
+
+  @if (showProductModal()) {
+    <app-product-modal
+      [product]="selectedProduct()"
+      [isSaving]="isSavingProduct()"
+      (save)="handleSaveProduct($event)"
+      (cancel)="closeProductModal()"
+    />
+  }
+</section>
+

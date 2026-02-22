@@ -1,0 +1,156 @@
+<div class="users-section">
+<div class="mb-6 flex items-center justify-end">
+      <button
+        (click)="openCreateModal()"
+        class="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
+      >
+        <lucide-icon [img]="PlusIcon" class="h-5 w-5"></lucide-icon>
+        Criar Novo Usuário
+      </button>
+    </div>
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+  
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-slate-200 text-left">
+            <th class="pb-3 text-sm font-semibold text-slate-600">Nome</th>
+            <th class="pb-3 text-sm font-semibold text-slate-600">Email</th>
+            <th class="pb-3 text-sm font-semibold text-slate-600">Role</th>
+            <th class="pb-3 text-sm font-semibold text-slate-600">Data de Cadastro</th>
+            <th class="pb-3 text-right text-sm font-semibold text-slate-600">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Loading State -->
+          @if (isLoading()) {
+            <tr>
+              <td colspan="5" class="py-8 text-center text-slate-500">
+                <div class="flex flex-col items-center gap-2">
+                  <svg class="h-8 w-8 animate-spin text-blue-600" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Carregando usuários...</span>
+                </div>
+              </td>
+            </tr>
+          }
+
+          <!-- Empty State -->
+          @if (!isLoading && (!allUsers || !allUsers.length)) {
+            <tr>
+              <td colspan="5" class="py-12 text-center">
+                <div class="flex flex-col items-center gap-2 text-slate-400">
+                  <lucide-icon [img]="PlusIcon" class="h-12 w-12 opacity-20"></lucide-icon>
+                  <p class="text-lg font-medium">Nenhum usuário encontrado</p>
+                  <p class="text-sm">Comece criando um novo usuário para sua plataforma</p>
+                </div>
+              </td>
+            </tr>
+          }
+
+          <!-- Data Rows -->
+          @if (!isLoading()) {
+            @for (user of allUsers(); track user.id) {
+              <tr 
+                class="group border-b border-slate-100 transition-colors hover:bg-slate-50/50"
+                [class.opacity-60]="user.status === 'DELETED'"
+              >
+                <td class="py-4 font-medium text-slate-800">
+                  <div class="flex items-center gap-2">
+                    {{ user.name }}
+                    @if (user.status === 'DELETED') {
+                      <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
+                        Deletado
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td class="py-4 text-slate-600">
+                  <span [class.line-through]="user.status === 'DELETED'">{{ user.email }}</span>
+                </td>
+                <td class="py-4">
+                  <span [class]="'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ' + (user.role === Role.SUPERADMIN ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700')">
+                    {{ user.role }}
+                  </span>
+                </td>
+                <td class="py-4 text-sm text-slate-500">
+                  {{ formatDate(user.createdAt) }}
+                </td>
+                <td class="py-4">
+                  <div class="flex items-center justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                    @if (user.status !== 'DELETED') {
+                      <button
+                        (click)="openEditModal(user)"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                        title="Editar"
+                      >
+                        <lucide-icon [img]="PencilIcon" class="h-4 w-4"></lucide-icon>
+                      </button>
+                      <button
+                        (click)="confirmDelete(user)"
+                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                        title="Excluir"
+                      >
+                        <lucide-icon [img]="Trash2Icon" class="h-4 w-4"></lucide-icon>
+                      </button>
+                    } @else {
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs italic text-slate-400 px-2">Removido em {{ formatDate(user.deletedAt) }}</span>
+                        <button
+                          (click)="confirmRestore(user)"
+                          class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-green-50 hover:text-green-600"
+                          title="Reativar Usuário"
+                        >
+                          <lucide-icon [img]="RotateCcwIcon" class="h-4 w-4"></lucide-icon>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (pagination().totalPages > 1) {
+      <div class="mt-6 flex items-center justify-between border-t border-slate-100 pt-6">
+        <div class="text-sm text-slate-500">
+          Mostrando página <span class="font-medium text-slate-700">{{ pagination().page }}</span> de <span class="font-medium text-slate-700">{{ pagination().totalPages }}</span>
+          <span class="ml-1">({{ pagination().total }} usuários no total)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            (click)="changePage(pagination().page - 1)"
+            [disabled]="pagination().page <= 1"
+            class="flex items-center gap-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 disabled:opacity-40"
+          >
+            Anterior
+          </button>
+          <button
+            (click)="changePage(pagination().page + 1)"
+            [disabled]="pagination().page >= pagination().totalPages"
+            class="flex items-center gap-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 disabled:opacity-40"
+          >
+            Próxima
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Modal -->
+@if (showModal()) {
+  <app-user-modal
+    [user]="selectedUser()"
+    [isSaving]="isSaving()"
+    (save)="handleSave($event)"
+    (cancel)="closeModal()"
+  ></app-user-modal>
+}

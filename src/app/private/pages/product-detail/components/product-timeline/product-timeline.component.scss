@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+.history-list {
+  max-height: 220px;
+  overflow: hidden;
+  opacity: 1;
+  transition: max-height 200ms ease, opacity 200ms ease;
+}
+
+.history-list--expanded {
+  max-height: 1000px;
+}

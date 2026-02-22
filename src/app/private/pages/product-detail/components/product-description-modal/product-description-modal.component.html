@@ -1,0 +1,342 @@
+@if (isOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
+    (click)="onBackdropClick($event)"
+  >
+    <div
+      class="relative flex max-h-[90vh] w-full max-w-4xl flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl"
+    >
+      <div class="flex-shrink-0 border-b border-slate-200 p-6">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">{{ description()?.icon }}</span>
+            <div>
+              <h2 class="text-2xl font-bold text-slate-800">
+                {{ description()?.name }}
+              </h2>
+              <p class="mt-1 text-sm text-slate-500">
+                Gerada em {{ description()?.generatedAt | date: 'dd/MM/yyyy HH:mm' }}
+              </p>
+            </div>
+          </div>
+          <button
+            (click)="close.emit()"
+            class="rounded-lg p-2 transition-colors hover:bg-slate-100"
+            aria-label="Fechar"
+          >
+            <svg
+              class="h-5 w-5 text-slate-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        @if (description()?.status !== ImprovedDescriptionStatus.GENERATED) {
+          <div class="mt-4">
+            <span
+              class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold"
+              [class.bg-green-100]="description()?.status === ImprovedDescriptionStatus.APPROVED"
+              [class.text-green-700]="description()?.status === ImprovedDescriptionStatus.APPROVED"
+              [class.bg-red-100]="description()?.status === ImprovedDescriptionStatus.REJECTED"
+              [class.text-red-700]="description()?.status === ImprovedDescriptionStatus.REJECTED"
+            >
+            @if (description()?.status === ImprovedDescriptionStatus.APPROVED) {
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                ></path>
+              </svg>
+            } @else {
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            }
+              {{
+                description()?.status === ImprovedDescriptionStatus.APPROVED ? 'Aprovada' : 'Reprovada'
+              }}
+            </span>
+          </div>
+        }
+        
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-6">
+        @if (!isEditing()) {
+          <div class="space-y-4">
+            <div
+              class="rounded-xl bg-gradient-to-br from-slate-50 to-blue-50/30 p-6"
+            >
+              <p
+                class="whitespace-pre-line text-base leading-relaxed text-slate-700"
+              >
+                {{ description()?.result || '' }}
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-4 text-sm text-slate-600">
+              <div class="flex items-center gap-2">
+                <svg
+                  class="h-5 w-5 text-slate-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  ></path>
+                </svg>
+                <span>
+                  <strong>{{ (description()?.result || '').length }}</strong>
+                  caracteres
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg
+                  class="h-5 w-5 text-slate-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                  ></path>
+                </svg>
+                <span
+                  ><strong>{{
+                    countWords(description()?.result || '')
+                  }}</strong>
+                  palavras</span
+                >
+              </div>
+              <div class="flex items-center gap-2">
+                <svg
+                  class="h-5 w-5 text-slate-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  ></path>
+                </svg>
+                <span
+                  ><strong>{{
+                    countLines(description()?.result || '')
+                  }}</strong>
+                  linhas</span
+                >
+              </div>
+            </div>
+          </div>
+        } @else {
+          <div>
+            <textarea
+              [value]="editedText()"
+              (input)="onEditedTextInput($event)"
+              rows="20"
+              class="w-full rounded-xl border border-slate-300 p-4 text-base leading-relaxed focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              placeholder="Digite a descrição..."
+            ></textarea>
+            <p class="mt-2 text-sm text-slate-500">
+              {{ editedText().length }} caracteres ·
+              {{ countWords(editedText()) }} palavras
+            </p>
+          </div>
+        }
+      </div>
+
+      <div class="flex-shrink-0 border-t border-slate-200 p-6">
+        @if (!isEditing()) {
+          <div class="flex flex-wrap items-center gap-3">
+            <button
+              (click)="handleApprove()"
+              [disabled]="description()?.status !== ImprovedDescriptionStatus.GENERATED"
+              class="flex items-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all"
+              [class.cursor-not-allowed]="description()?.status !== ImprovedDescriptionStatus.GENERATED"
+              [class.bg-green-100]="description()?.status === ImprovedDescriptionStatus.APPROVED"
+              [class.text-green-700]="description()?.status === ImprovedDescriptionStatus.APPROVED"
+              [class.bg-green-50]="description()?.status !== ImprovedDescriptionStatus.APPROVED"
+              [class.text-green-600]="description()?.status !== ImprovedDescriptionStatus.APPROVED"
+              [class.hover:bg-green-100]="description()?.status === ImprovedDescriptionStatus.GENERATED"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
+                ></path>
+              </svg>
+              Aprovar
+            </button>
+
+            <button
+              (click)="handleReject()"
+              [disabled]="description()?.status !== ImprovedDescriptionStatus.GENERATED"
+              class="flex items-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all"
+              [class.cursor-not-allowed]="description()?.status !== ImprovedDescriptionStatus.GENERATED"
+              [class.bg-red-100]="description()?.status === ImprovedDescriptionStatus.REJECTED"
+              [class.text-red-700]="description()?.status === ImprovedDescriptionStatus.REJECTED"
+              [class.bg-red-50]="description()?.status !== ImprovedDescriptionStatus.REJECTED"
+              [class.text-red-600]="description()?.status !== ImprovedDescriptionStatus.REJECTED"
+              [class.hover:bg-red-100]="description()?.status === ImprovedDescriptionStatus.GENERATED"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"
+                ></path>
+              </svg>
+              Reprovar
+            </button>
+
+            <button
+              (click)="startEdit()"
+              class="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                ></path>
+              </svg>
+              Editar
+            </button>
+
+            <button
+              (click)="handleCopy()"
+              class="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              @if (!copied()) {
+                <svg
+                  class="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  ></path>
+                </svg>
+              } @else {
+                <svg
+                  class="h-5 w-5 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+              }
+              {{ copied() ? 'Copiado!' : 'Copiar' }}
+            </button>
+          </div>
+        } @else {
+          <div class="flex items-center gap-3">
+            <button
+              (click)="handleSave()"
+              class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-6 py-2.5 font-medium text-white transition-all hover:shadow-lg hover:shadow-blue-500/30"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                ></path>
+              </svg>
+              Salvar Alterações
+            </button>
+            <button
+              (click)="cancelEdit()"
+              class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-300 px-6 py-2.5 font-medium text-slate-700 hover:bg-slate-50"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+              Cancelar
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

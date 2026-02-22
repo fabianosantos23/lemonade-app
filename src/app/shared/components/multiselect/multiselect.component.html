@@ -1,0 +1,130 @@
+<div class="relative" (clickOutside)="closeDropdown()">
+  @if (label()) {
+    <label class="mb-2 block text-sm font-medium text-slate-700">
+      {{ label() }}
+      @if (required()) {
+        <span class="ml-0.5 text-red-500">*</span>
+      }
+    </label>
+  }
+
+  <!-- Selected Items Display -->
+  <div
+    (click)="toggleDropdown($event)"
+    class="flex min-h-[42px] cursor-pointer flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20"
+    [ngClass]="{
+      'border-blue-500 ring-2 ring-blue-500/20': isOpen() && !ngControl?.invalid,
+      'border-red-500 ring-2 ring-red-500/20': ngControl?.invalid && ngControl?.touched,
+      'opacity-50 cursor-not-allowed': isDisabled()
+    }"
+  >
+    <!-- Selected Tags -->
+    @for (item of selectedItems(); track item.id) {
+      <div class="flex items-center gap-1 rounded-lg bg-gradient-to-r from-blue-500 to-violet-500 px-2 py-1 text-sm text-white">
+        @if (item.icon) {
+          <span class="text-base">{{ item.icon }}</span>
+        }
+        <span>{{ item.label }}</span>
+        <button
+          type="button"
+          (click)="removeItem(item, $event)"
+          class="ml-1 rounded hover:bg-white/20"
+          aria-label="Remover"
+          [disabled]="isDisabled()"
+        >
+          <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    }
+
+    <!-- Search Input -->
+    <input
+      #searchInputRef
+      [ngModel]="searchQuery()"
+      (input)="onSearchInput($event)"
+      type="text"
+      [placeholder]="selectedItems().length === 0 ? placeholder() : 'Buscar...'"
+      class="min-w-[120px] flex-1 border-none bg-transparent outline-none disabled:cursor-not-allowed"
+      tabindex="-1"
+      autocomplete="off"
+      (click)="$event.stopPropagation()"
+      (keydown.escape)="closeDropdown()"
+      (keydown.enter.prevent)="selectFirst()"
+      [disabled]="isDisabled()"
+    />
+
+    <!-- Dropdown Icon -->
+    <svg
+      class="h-5 w-5 flex-shrink-0 text-slate-400 transition-transform"
+      [class.rotate-180]="isOpen()"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  </div>
+
+  <!-- Dropdown List -->
+  @if (isOpen()) {
+    <div
+      [animate.enter]="'dropdown-enter'"
+      [animate.leave]="'dropdown-leave'"
+      class="absolute top-full z-50 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg"
+    >
+      <!-- No Results -->
+      @if (filteredOptions().length === 0) {
+        <div class="px-4 py-3 text-center text-sm text-slate-500">
+          Nenhum resultado encontrado
+        </div>
+      }
+
+      <!-- Options List -->
+      @for (option of filteredOptions(); track option.id) {
+        <button
+          type="button"
+          (click)="toggleOption(option)"
+          class="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50"
+          [class.bg-blue-50]="isSelected(option)"
+        >
+          <!-- Checkbox -->
+          <div
+            class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 transition-all"
+            [class.border-blue-500]="isSelected(option)"
+            [class.bg-blue-500]="isSelected(option)"
+            [class.border-slate-300]="!isSelected(option)"
+            [class.bg-white]="!isSelected(option)"
+          >
+            @if (isSelected(option)) {
+              <svg class="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+              </svg>
+            }
+          </div>
+
+          <!-- Icon -->
+          @if (option.icon) {
+            <span class="text-2xl">{{ option.icon }}</span>
+          }
+
+          <!-- Label and Description -->
+          <div class="flex-1">
+            <div class="font-medium text-slate-800">{{ option.label }}</div>
+            @if (option.description) {
+              <div class="text-xs text-slate-500">{{ option.description }}</div>
+            }
+          </div>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Helper Text -->
+  @if (helperText()) {
+    <p class="mt-2 text-sm text-slate-500">
+      {{ helperText() }}
+    </p>
+  }
+</div>

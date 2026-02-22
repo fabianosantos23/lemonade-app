@@ -1,0 +1,38 @@
+<div class="mb-4 flex items-start justify-between">
+  <h2 class="text-xl font-bold text-slate-800">
+    {{ title() }}
+  </h2>
+  <span
+    class="rounded-full px-3 py-1 text-sm font-semibold"
+    [class]="statusClasses()"
+  >
+    {{ statusLabel() }}
+  </span>
+</div>
+
+<div class="space-y-4">
+  <div>
+    <label class="mb-2 block text-sm font-medium text-slate-700">
+      Nome do Produto
+    </label>
+    <p class="text-lg text-slate-800">{{ product()?.name }}</p>
+  </div>
+
+  <div>
+    <label class="mb-2 block text-sm font-medium text-slate-700">
+      Descrição
+    </label>
+    <p class="whitespace-pre-wrap text-slate-600">
+      {{ product()?.simpleDescription }}
+    </p>
+  </div>
+
+  <div>
+    <label class="mb-2 block text-sm font-medium text-slate-700">
+      Data de Cadastro
+    </label>
+    <p class="text-slate-600">
+      {{ createdAt() | date: 'dd/MM/yyyy' }}
+    </p>
+  </div>
+</div>

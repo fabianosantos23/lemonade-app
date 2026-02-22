@@ -1,0 +1,107 @@
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <app-product-info-card
+      [product]="product()"
+      [createdAt]="this.product()?.createdAt || ''"
+    />
+    @if (!showEmptyState()) {
+      <app-product-generated-description
+        [descriptions]="descriptions()"
+        [viewMode]="descriptionViewMode()"
+        [savingDescriptionId]="savingDescriptionId()"
+        [editingDescriptionId]="editingDescriptionId()"
+        [editingDescriptionText]="editingDescriptionText()"
+        (viewModeChange)="handleViewModeChange($event)"
+        (openDescription)="handleOpenDescription($event)"
+        (toggleEdit)="handleToggleEdit($event)"
+        (editingTextChange)="handleEditingTextChange($event)"
+        (saveEdit)="handleSaveEdit($event)"
+        (cancelEdit)="handleCancelEdit()"
+        (approve)="handleApprove($event)"
+        (reject)="handleReject($event)"
+        (generateWithAI)="handleOpenEnhanceModal()"
+      />
+    } @else {
+      <div class="rounded-2xl border border-slate-200 bg-white/80 p-6 backdrop-blur-sm">
+        <div class="py-12 text-center">
+          <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 to-violet-100">
+            <svg
+              class="h-10 w-10 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+              />
+            </svg>
+          </div>
+          <h3 class="mb-2 text-lg font-semibold text-slate-800">
+            Nenhuma descrição gerada
+          </h3>
+          <p class="mb-6 text-slate-500">
+            Use a IA para gerar descrições otimizadas para diferentes
+            marketplaces
+          </p>
+          <button
+            (click)="showEnhanceModal.set(true)"
+            class="rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-6 py-3 font-medium text-white transition-all hover:shadow-lg hover:shadow-blue-500/30"
+          >
+            Gerar com IA
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+  <div class="space-y-6">
+    <app-product-quick-stats
+      [stats]="stats()"
+    />
+    <app-product-action-card
+      [showPublishButton]="showPublishButton()"
+      [canEdit]="canEdit()"
+      [canUseAI]="canUseAI()"
+      (edit)="handleEdit()"
+      (generateAI)="handleOpenEnhanceModal()"
+      (publish)="handlePublish()"
+      (delete)="handleDelete()"
+    />
+    <app-product-timeline
+      [createdAt]="this.product()?.createdAt || ''"
+      [history]="history()"
+    />
+  </div>
+</div>
+
+@if (showEnhanceModal()) {
+  <app-enhance-with-ai-modal
+    [isOpen]="showEnhanceModal()"
+    [product]="product()"
+    [ecommerces]="ecommerces()"
+    (close)="showEnhanceModal.set(false)"
+    (submit)="handleEnhanceSubmit($event)"
+  />
+}
+
+@if (selectedDescription()) {
+  <app-product-description-modal
+    [isOpen]="showDescriptionModal()"
+    [description]="selectedDescription()"
+    (close)="showDescriptionModal.set(false)"
+    (approve)="handleApprove($event)"
+    (reject)="handleReject($event)"
+    (save)="handleSaveDescriptionFromModal($event)"
+  />
+}
+
+@if (showProductModal()) {
+  <app-product-modal
+    [product]="product()"
+    [isSaving]="isSavingProduct()"
+    (save)="handleSaveProductFromModal($event)"
+    (cancel)="closeProductModal()"
+  />
+}

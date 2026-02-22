@@ -1,0 +1,21 @@
+<h3 class="mb-4 font-semibold text-slate-800">Estatísticas</h3>
+<div class="space-y-3">
+  <div class="flex items-center justify-between">
+    <span class="text-sm text-slate-600">Descrições Geradas</span>
+    <span class="font-semibold text-slate-800">
+      {{ stats()?.generatedDescriptionsCount ?? 0 }}
+    </span>
+  </div>
+  <div class="flex items-center justify-between">
+    <span class="text-sm text-slate-600">Marketplaces com descrição</span>
+    <span class="font-semibold text-slate-800">
+      {{ stats()?.ecommercesWithDescription ?? 0 }}
+    </span>
+  </div>
+  <div class="flex items-center justify-between">
+    <span class="text-sm text-slate-600">Última melhoria</span>
+    <span class="font-semibold text-slate-800">
+      {{ stats()?.lastEnhancementAt ? (stats()?.lastEnhancementAt | date: 'dd/MM/yyyy') : '–' }}
+    </span>
+  </div>
+</div>

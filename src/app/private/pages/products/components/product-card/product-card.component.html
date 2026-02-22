@@ -1,0 +1,186 @@
+<div
+  class="group rounded-2xl border border-slate-200 bg-white/80 p-6 backdrop-blur-sm transition-all duration-200 hover:shadow-lg hover:shadow-slate-200/50"
+>
+  <!-- Header -->
+  <div class="mb-4 flex items-start justify-between">
+    <div class="min-w-0 flex-1">
+      <h3 class="mb-1 truncate text-lg font-semibold text-slate-800">
+        {{ product().name }}
+      </h3>
+      <p class="text-sm text-slate-500">
+        Cadastrado em {{ product().createdAt | date: 'dd/MM/yyyy' }}
+      </p>
+    </div>
+
+    <!-- Status Badge -->
+    <span
+      class="ml-3 flex-shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
+      [class]="statusClasses()"
+    >
+      {{ statusLabel() }}
+    </span>
+  </div>
+
+  <!-- Description Preview -->
+  <div class="mb-4">
+    <p class="line-clamp-3 text-sm text-slate-600">
+      {{ product().simpleDescription }}
+    </p>
+  </div>
+
+  <!-- Metadata -->
+  <div class="mb-4 flex items-center gap-4 text-xs text-slate-500">
+    <div class="flex items-center gap-1">
+      <svg
+        class="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+        />
+      </svg>
+      <span>{{ product().simpleDescription.length || 0 }} caracteres</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <svg
+        class="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+        />
+      </svg>
+      <span>ID: {{ product().id }}</span>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex items-center gap-2">
+    @if (product().status === ProductStatus.ACTIVE) {
+      <button
+        (click)="enhance.emit(product())"
+        class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/30"
+      >
+        <svg
+          class="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+          />
+        </svg>
+        Melhorar com IA
+      </button>
+    }
+
+    <button
+      (click)="viewDetails.emit(product())"
+      class="flex items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
+      [class.flex-1]="product().status !== ProductStatus.ACTIVE"
+    >
+      <svg
+        class="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+        />
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+        />
+      </svg>
+      Ver Detalhes
+    </button>
+
+    <div class="relative" (appClickOutside)="showMenu.set(false)">
+      <button
+        (click)="toggleMenu()"
+        class="rounded-xl bg-slate-100 px-3 py-2 text-slate-700 transition-colors hover:bg-slate-200"
+        aria-label="Mais opções"
+      >
+        <svg
+          class="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+          />
+        </svg>
+      </button>
+
+      <!-- Dropdown Menu -->
+      @if (showMenu()) {
+        <div
+          class="absolute right-0 top-full z-10 mt-2 w-48 rounded-xl border border-slate-200 bg-white py-2 shadow-lg animate-dropdown"
+        >
+          <button
+            (click)="handleEdit()"
+            class="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            <svg
+              class="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+            Editar
+          </button>
+          <button
+            (click)="handleDelete()"
+            class="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-red-600 transition-colors hover:bg-red-50"
+          >
+            <svg
+              class="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+            Excluir
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

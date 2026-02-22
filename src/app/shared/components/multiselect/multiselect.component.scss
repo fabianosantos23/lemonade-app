@@ -1,0 +1,29 @@
+.dropdown-enter {
+  animation: dropdown-enter 200ms ease forwards;
+}
+
+.dropdown-leave {
+  animation: dropdown-leave 200ms ease forwards;
+}
+
+@keyframes dropdown-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dropdown-leave {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}

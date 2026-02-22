@@ -1,0 +1,145 @@
+<div
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+  (click)="closeModal()"
+>
+  <div
+    class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header -->
+    <div class="relative bg-gradient-to-r from-blue-600 to-violet-600 px-8 py-6">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-white">
+            {{ isEditing() ? "Editar Usuário" : "Novo Usuário" }}
+          </h2>
+          <p class="mt-1 text-sm text-blue-100">
+            {{ isEditing() ? "Atualize as informações do usuário" : "Cadastre um novo usuário na plataforma" }}
+          </p>
+        </div>
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="rounded-lg p-1.5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+          aria-label="Fechar modal"
+        >
+          <lucide-icon [img]="XIcon" class="h-5 w-5"></lucide-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="max-h-[calc(90vh-12rem)] overflow-y-auto">
+      <form
+        [formGroup]="form"
+        (ngSubmit)="onSubmit()"
+        class="space-y-6 p-8"
+        novalidate
+      >
+        <!-- Nome -->
+        <div>
+          <label for="name" class="mb-2 block text-sm font-semibold text-slate-700">
+            Nome Completo <span class="text-red-500">*</span>
+          </label>
+          <input
+            id="name"
+            formControlName="name"
+            type="text"
+            placeholder="Ex: João Silva"
+            [class]="'w-full rounded-xl border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 ' + (form.controls['name'].invalid && form.controls['name'].touched ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200' : 'border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-200')"
+          />
+          @if (form.controls['name'].invalid && form.controls['name'].touched) {
+            <p class="mt-1.5 flex items-center gap-1 text-xs text-red-600">
+              <lucide-icon [img]="AlertCircleIcon" class="h-3.5 w-3.5"></lucide-icon>
+              Nome é obrigatório (mín. 2 caracteres)
+            </p>
+          }
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label for="email" class="mb-2 block text-sm font-semibold text-slate-700">
+            Email <span class="text-red-500">*</span>
+          </label>
+          <input
+            id="email"
+            formControlName="email"
+            type="email"
+            placeholder="Ex: joao@empresa.com"
+            [class]="'w-full rounded-xl border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 ' + (form.controls['email'].invalid && form.controls['email'].touched ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200' : 'border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-200 disabled:bg-slate-50 disabled:text-slate-500')"
+          />
+          @if (form.controls['email'].invalid && form.controls['email'].touched) {
+            <p class="mt-1.5 flex items-center gap-1 text-xs text-red-600">
+              <lucide-icon [img]="AlertCircleIcon" class="h-3.5 w-3.5"></lucide-icon>
+              Email válido é obrigatório
+            </p>
+          }
+        </div>
+
+        @if (!isEditing()) {
+          <!-- Senha -->
+          <div>
+            <label for="password" class="mb-2 block text-sm font-semibold text-slate-700">
+              Senha <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="password"
+              formControlName="password"
+              type="password"
+              placeholder="Mínimo 8 caracteres"
+              [class]="'w-full rounded-xl border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 ' + (form.controls['password'].invalid && form.controls['password'].touched ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200' : 'border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-200')"
+            />
+            @if (form.controls['password'].invalid && form.controls['password'].touched) {
+              <p class="mt-1.5 flex items-center gap-1 text-xs text-red-600">
+                <lucide-icon [img]="AlertCircleIcon" class="h-3.5 w-3.5"></lucide-icon>
+                Senha deve ter pelo menos 8 caracteres
+              </p>
+            }
+          </div>
+        }
+
+        <!-- Role -->
+        <div>
+          <label for="role" class="mb-2 block text-sm font-semibold text-slate-700">
+            Papel de Acesso <span class="text-red-500">*</span>
+          </label>
+          <select
+            id="role"
+            formControlName="role"
+            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          >
+            @for (role of roles; track role) {
+              <option [value]="role">{{ role }}</option>
+            }
+          </select>
+        </div>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="border-t border-slate-200 bg-slate-50 px-8 py-4">
+      <div class="flex items-center justify-end gap-3">
+        <button
+          (click)="closeModal()"
+          [disabled]="isSaving()"
+          class="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition-all hover:bg-white disabled:opacity-50"
+        >
+          Cancelar
+        </button>
+        <button
+          (click)="onSubmit()"
+          [disabled]="isSaving()"
+          class="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-lg disabled:opacity-50"
+        >
+          @if (isSaving()) {
+            <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          }
+          {{ isEditing() ? "Salvar Alterações" : "Criar Usuário" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
